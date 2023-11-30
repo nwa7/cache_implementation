@@ -8,21 +8,22 @@
  * Nov 15, 2023
  *
  */
-
+#pragma once
 /* DO NOT CHANGE THE FOLLOWING DEFINITIONS EXCEPT 'DEFAULT_CACHE_ASSOC */
 
 #ifndef _CACHE_IMPL_H_
 #define _CACHE_IMPL_H_
 
-#define WORD_SIZE_BYTE 4
-#define DEFAULT_CACHE_SIZE_BYTE 32
-#define DEFAULT_CACHE_BLOCK_SIZE_BYTE 8
+#define WORD_SIZE_BYTE 4                // 1 word = 4 bytes
+#define DEFAULT_CACHE_SIZE_BYTE 32      // cache size = 32 bytes
+#define DEFAULT_CACHE_BLOCK_SIZE_BYTE 8 // block size = 8 bytes
 #define DEFAULT_CACHE_ASSOC                                                    \
   2 /* This can be changed to 1(for direct mapped cache) or 4(for fully assoc  \
        cache) */
-#define DEFAULT_MEMORY_SIZE_WORD 128
-#define CACHE_ACCESS_CYCLE 1
-#define MEMORY_ACCESS_CYCLE 100
+#define DEFAULT_MEMORY_SIZE_WORD                                               \
+  128                           // main memory size = 128 words, 128 * 4 bytes
+#define CACHE_ACCESS_CYCLE 1    // cache access time = 1 cycle
+#define MEMORY_ACCESS_CYCLE 100 // main memory access time = 100 cycles
 #define CACHE_SET_SIZE                                                         \
   ((DEFAULT_CACHE_SIZE_BYTE) /                                                 \
    (DEFAULT_CACHE_BLOCK_SIZE_BYTE * DEFAULT_CACHE_ASSOC))
