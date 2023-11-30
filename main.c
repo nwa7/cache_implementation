@@ -63,7 +63,6 @@ int main(void) {
 
     fprintf(ofp, "Accessed data: %d\n", accessed_data);
     global_timestamp++;
-    /
   }
 
   fclose(ifp);
