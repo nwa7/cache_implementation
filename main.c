@@ -23,6 +23,16 @@ int global_timestamp = 0;
 int retrieve_data(void *addr, char data_type) {
   int value_returned = -1; /* accessed data */
 
+  if(check_cache_data_hit(*addr, data_type)!=-1){
+    //Hit
+    printf("Hit!!!");
+  }else if(access_memory(*addr, data_type)!=-1){
+  //Miss
+  printf("Miss!!!");
+  }else{
+
+    printf("Error!!!");
+  }
   /* Invoke check_cache_data_hit() */
 
   /* In case of the cache miss event, access the main memory by invoking
@@ -56,14 +66,23 @@ int main(void) {
   }
 
   char line[256]; // to store the line that is being processed
+  while(*ofp!=NULL){
+    printf(*ofp);
+    ofp++;
+  }
+
   while (fgets(line, sizeof(line), ifp) !=
          NULL) { // need to read all the input data
     /* Fill out here by invoking retrieve_data() */
     // call retrieve data to 4) Read each line
 
+    retrieve_data(line[], )
+
     fprintf(ofp, "Accessed data: %d\n", accessed_data);
     global_timestamp++;
   }
+
+
 
   fclose(ifp);
   fclose(ofp);
