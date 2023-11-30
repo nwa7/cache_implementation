@@ -11,6 +11,7 @@
 
 #include "cache_impl.h"
 #include <stdio.h>
+#include <string.h>
 
 int num_cache_hits = 0;   // number of hits
 int num_cache_misses = 0; // number of misses
@@ -70,21 +71,25 @@ int main(void) {
   }
 
   char line[256]; // to store the line that is being processed
-  // while (*ofp != NULL) {
-  //   printf(*ofp);
-  //   ofp++;
-  // }
-  /* read each line and get the data in given (address, type)*/
-  /* print hit ratio and bandwith for each cache mechanism as regards to cache
-   * association size */
+  char *splitString;
+  // while(**ofp!=NULL){
+  // printf(*ofp);
+  // ofp++;
+  //}
+
   while (fgets(line, sizeof(line), ifp) !=
          NULL) { // need to read all the input data
                  /* Fill out here by invoking retrieve_data() */
                  // call retrieve data to 4) Read each line
 
-    // retrieve_data(line[], )
-
+    // retrieve_data(line[], 0);
+    printf("hello");
+    // puts(line);
     fprintf(ofp, "Accessed data: %d\n", accessed_data);
+    splitString = strtok(line, " ");
+    puts((int *)splitString);
+    puts((int *)(splitString + 2));
+    // retrieve_data(&splitString, splitString+1);
     global_timestamp++;
   }
 
