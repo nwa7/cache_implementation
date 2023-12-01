@@ -85,9 +85,20 @@ void print_cache_entries() {
 }
 
 int check_cache_data_hit(void *addr, char type) {
-
+    int size;
+    int *address=addr;
+    printf("%d", *address);
+    if(type=="b"){
+        size=1;
+    }else if(type=="h"){
+        size=2;
+    }else{
+        size==4;
+    }
   /* Fill out here */
 
+  //int address=addr[0];
+  
   /* Return the data */
   return 0;
 }
@@ -110,7 +121,7 @@ int access_memory(void *addr, char type) {
    * address due to 'int memory_array[]' */
 
   /* You need to invoke find_entry_index_in_set() for copying to the cache */
-
+    find_entry_index_in_set(1);
   /* Return the accessed data with a suitable type */
 
   return 0;
