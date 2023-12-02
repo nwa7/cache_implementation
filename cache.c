@@ -123,18 +123,19 @@ int find_entry_index_in_set(int cache_index) {
   int entry_index;
 
   /* Check if there exists any empty cache space by checking 'valid' */
-  int i, j;
+  int j;
+  // int i; unusued param
 
   for (j = 0; j < DEFAULT_CACHE_ASSOC; j++) {
     cache_entry_t *pEntry = &cache_array[cache_index][j];
-    if (pEntry->valid = 0) {
+    if ((pEntry->valid = 0)) {
       return j;
     }
   }
   int timestamp_min = -1;
   for (j = 0; j < DEFAULT_CACHE_ASSOC; j++) {
     cache_entry_t *pEntry = &cache_array[cache_index][j];
-    if (timestamp_min = -1 || timestamp_min > pEntry->timestamp) {
+    if ((timestamp_min = -1 || timestamp_min > pEntry->timestamp)) {
       entry_index = j;
       timestamp_min = pEntry->timestamp;
     }
@@ -153,6 +154,7 @@ int access_memory(void *addr, char type) {
   int block_address = address / 8;
   int tag = block_address >> ((4 / DEFAULT_CACHE_ASSOC) -
                               1); // the 4 could also be the blocknumber
+  (void)tag; // TEMPORARY so we don't get the warning of UNUSUED PARAM
   int temp1 = 1 << (4 / DEFAULT_CACHE_ASSOC);
   int set = block_address % temp1;
 
