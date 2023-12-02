@@ -32,14 +32,14 @@ int retrieve_data(void *addr, char data_type) {
   value_returned = check_cache_data_hit(ad, data_type);
   if (value_returned != -1) { // check data in cache
     // Hit
-    printf("Hit!!!");
+    printf("Hit!!!\n");
     return value_returned;
   }
 
   value_returned = access_memory(ad, data_type);
   if (value_returned != -1) { // check data in memory
     // Miss
-    printf("Miss!!!");
+    printf("Miss!!!\n");
     // in case of miss event retrieve data from the main memory by invoking
     // access memory
     return value_returned;
@@ -56,10 +56,10 @@ int main(void) {
   FILE *ifp = NULL, *ofp = NULL;
   unsigned long int access_addr; /* byte address (located at 1st column) in
                                     "access_input.txt" */
-  char access_type;  /* 'b'(byte), 'h'(halfword), or 'w'(word) (located at 2nd
-                        column) in "access_input.txt" */
-  int accessed_data; /* This is the data that you want to retrieve first from
-                        cache, and then from memory */
+  char access_type; /* 'b'(byte), 'h'(halfword), or 'w'(word) (located at 2nd
+                       column) in "access_input.txt" */
+  // int accessed_data; /* This is the data that you want to retrieve first from
+  // cache, and then from memory * /
   init_memory_content(); // 1) Invoke init_memory_content
   init_cache_content();  // 2) Invoke init_cache_content
 
@@ -97,6 +97,10 @@ int main(void) {
     /** if (check_cache_data_hit((void *)access_addr, access_type) != -1) {
       num_cache_hits++;
     }; **/
+
+    /** if (access_memory((void *)access_addr, access_type) != -1) {
+      num_cache_miss++;
+    }; **/
     global_timestamp++;
   }
 
@@ -104,6 +108,8 @@ int main(void) {
   fprintf(ofp, "Hit Ratio: %.2f%%\n",
           hit_ratio * 100); // print hit_ratio in ofp
 **/
+
+  // NEED TO CALCULATE BANDWITH = NUMBER OF BYTES / NUMBER OF CLOCK CYCLES
   fclose(ifp);
   fclose(ofp);
 

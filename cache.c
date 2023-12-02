@@ -170,17 +170,46 @@ int find_entry_index_in_set(int cache_index) {
 }
 
 int access_memory(void *addr, char type) {
-  char *addres = addr;
-  int address = *addres;
-  printf("%d", address);
-  int block_address = address / 8;
-  int tag = block_address >> ((4 / DEFAULT_CACHE_ASSOC) -
-                              1); // the 4 could also be the blocknumber
-  (void)tag; // TEMPORARY so we don't get the warning of UNUSUED PARAM
+  char *address = addr;
+  int block_address = *address / DEFAULT_CACHE_BLOCK_SIZE_BYTE;
+  int tag = block_address >>
+            ((4 / DEFAULT_CACHE_ASSOC) -
+             1); // the 4 could also be the blocknumber, 4 bytes for 1 word
   int temp1 = 1 << (4 / DEFAULT_CACHE_ASSOC);
   int set = block_address % temp1;
 
-  find_entry_index_in_set(set); // get the entry index
+  /* add this cache access cycle to global access cycle */
+  /* check all entries in a set */
+  int j;
+  for (j = 0; j < DEFAULT_CACHE_ASSOC; j++) {
+    cache_entry_t *pEntry = &cache_array[set][j];
+
+    // check if the tag matches and the entry is valid
+    if (pEntry->tag == tag && pEntry->valid == 1) {
+      pEntry->timestamp = global_timestamp;
+
+      // difference depending on type
+      // NEED TO BE CHANGED I JUST COPIED FROM CACHE
+      switch (type) {
+      case 'b':
+        return pEntry->data[*address % DEFAULT_CACHE_BLOCK_SIZE_BYTE];
+
+      case 'h':
+        return *(short *)(pEntry->data +
+                          *address % DEFAULT_CACHE_BLOCK_SIZE_BYTE);
+        ;
+
+      case 'w':
+        return *(int *)(pEntry->data +
+                        *address % DEFAULT_CACHE_BLOCK_SIZE_BYTE);
+      default:
+        return -1; // unknown type
+      };
+      // return pEntry->data[0]; // TODO that is not the right value yet,
+      //  depends on size I guess
+    }
+  }
+  // get the entry index
   /* Add this main memory access cycle to global access cycle */
   /* Fetch the data from the main memory and copy them to the cache */
   /* void *addr: addr is byte address, whereas your main memory address is
@@ -190,5 +219,5 @@ int access_memory(void *addr, char type) {
 
   /* Return the accessed data with a suitable type (b, h, w)*/
 
-  return -1;
+  return -1; // if the data is not in the memory
 }
