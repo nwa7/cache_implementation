@@ -12,25 +12,34 @@
 #include "cache_impl.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
-int num_cache_hits = 0;   // number of hits
-int num_cache_misses = 0; // number of misses
+int num_cache_hits = 0;
+int num_cache_misses = 0;
 
-int num_bytes = 0;         // number of accessed bytes
-int num_access_cycles = 0; // number of clock cycles
+int num_bytes = 0;
+int num_access_cycles = 0;
 
-int global_timestamp = 0; // number of data access trials
+int global_timestamp = 0;
 
 int retrieve_data(void *addr, char data_type) {
+    char* ad=addr;
   int value_returned = -1; /* accessed data */
-
-  if (check_cache_data_hit(addr, data_type) != -1) {
-    // Hit
+  int temp=atoi(ad);
+  printf("%d", *ad);
+  printf("a");
+value_returned=check_cache_data_hit(ad, data_type);
+  if(value_returned!=-1){
+    //Hit
     printf("Hit!!!");
-  } else if (access_memory(addr, data_type) != -1) {
-    // Miss
-    printf("Miss!!!");
-  } else {
+    return value_returned;
+  }
+  value_returned=access_memory(ad, data_type);
+  if(value_returned!=-1){
+  //Miss
+  printf("Miss!!!");
+  return value_returned;
+  }else{
 
     printf("Error!!!");
   }
@@ -51,19 +60,15 @@ int main(void) {
   int accessed_data; /* This is the data that you want to retrieve first from
                         cache, and then from memory */
 
-  // initialize memory and cache
-
   init_memory_content(); // 1) Invoke init_memory_content
   init_cache_content();  // 2) Invoke init_cache_content
 
-  ifp = fopen("access_input.txt",
-              "r"); // 3) open access_input.txt file in reading mode
+  ifp = fopen("access_input.txt", "r"); // 3) open access_input.txt file
   if (ifp == NULL) {
     printf("Can't open input file\n");
     return -1;
   }
-  ofp = fopen("access_output.txt",
-              "w"); // open access_output.txt file in writing mode
+  ofp = fopen("access_output.txt", "w");
   if (ofp == NULL) {
     printf("Can't open output file\n");
     fclose(ifp);
@@ -72,26 +77,33 @@ int main(void) {
 
   char line[256]; // to store the line that is being processed
   char *splitString;
-  // while(**ofp!=NULL){
-  // printf(*ofp);
-  // ofp++;
+ // while(**ofp!=NULL){
+   // printf(*ofp);
+    //ofp++;
   //}
 
   while (fgets(line, sizeof(line), ifp) !=
          NULL) { // need to read all the input data
-                 /* Fill out here by invoking retrieve_data() */
-                 // call retrieve data to 4) Read each line
+    /* Fill out here by invoking retrieve_data() */
+    // call retrieve data to 4) Read each line
 
-    // retrieve_data(line[], 0);
+    //retrieve_data(line[], 0);
     printf("hello");
-    // puts(line);
+    puts(line);
+    access_type=line[4];
+    
     fprintf(ofp, "Accessed data: %d\n", accessed_data);
-    splitString = strtok(line, " ");
-    puts((int *)splitString);
-    puts((int *)(splitString + 2));
-    // retrieve_data(&splitString, splitString+1);
+    //splitString=strtok(line, " ");
+    //puts((int*)splitString);
+    //puts((int*)(splitString+2));
+    *line=atoi(line);
+    printf("%d", *line);
+    retrieve_data(line, access_type);
     global_timestamp++;
   }
+  
+
+
 
   fclose(ifp);
   fclose(ofp);
