@@ -78,6 +78,7 @@ int main(void) {
   fprintf(ofp, "[Accessed Data]\n");
 
   char line[256];
+  int hits = 0;
 
   /* Fill out here by invoking retrieve_data() */
   while (fgets(line, sizeof(line), ifp) !=
@@ -88,17 +89,25 @@ int main(void) {
     printf("Calling retrieve_data with addr: %lx, data_type: %c\n", access_addr,
            access_type);
 
-    fprintf(ofp, "%lu %c \n", access_addr, access_type);
+    fprintf(ofp, "%lx %c \n", access_addr, access_type);
     // print addr and data_type accessed in the output file,
     // when accessed_data ready add 0x%x
-    global_timestamp++;
 
     // print hit ratio and bandwidth for each cache mechanism as regards to
     // cache association size
+    /** if (check_cache_data_hit((void *)access_addr, access_type) != -1) {
+      hits++;
+    }; **/
+    global_timestamp++;
   }
 
+  /**double hit_ratio = (double)hits / global_timestamp;
+  fprintf(ofp, "Hit Ratio: %.2f%%\n",
+          hit_ratio * 100); // print hit_ratio in ofp
+**/
   fclose(ifp);
   fclose(ofp);
 
   print_cache_entries(); // print the final cache entries
+  return 0;
 }

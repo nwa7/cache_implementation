@@ -95,24 +95,31 @@ void print_cache_entries() {
 
 // this function is to return the data in the cache
 int check_cache_data_hit(void *addr, char type) {
-  char *addres = addr;
-  int address = *addres;
-  printf("%d", address);
-  int block_address = address / 8;
-  int tag = block_address >> ((4 / DEFAULT_CACHE_ASSOC) -
-                              1); // the 4 could also be the blocknumber
+  char *address = addr;
+  int block_address = *address / 8; // knowing 1 block = 8 bytes
+  int tag = block_address >>
+            ((4 / DEFAULT_CACHE_ASSOC) -
+             1); // the 4 could also be the blocknumber, 4 bytes for 1 word
   int temp1 = 1 << (4 / DEFAULT_CACHE_ASSOC);
   int set = block_address % temp1;
+
+  // printf("%d", address);
+
   int j;
   for (j = 0; j < DEFAULT_CACHE_ASSOC; j++) {
     cache_entry_t *pEntry = &cache_array[set][j];
+
+    // check if the tag matches and the entry is valid
     if (pEntry->tag == tag && pEntry->valid == 1) {
       pEntry->timestamp = global_timestamp;
       return pEntry->data[0]; // TODO that is not the right value yet, depends
                               // on size I guess
     }
   }
-  /* Fill out here */
+  /* add this cache access cycle to global access cycle */
+  /* check all entries in a set */
+  /* if there is no data in cache, data is missed and return -1*/
+  // return -1 for missing
 
   /* Return the data */
   return -1; // if the data is not in the cache
