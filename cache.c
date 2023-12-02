@@ -122,28 +122,31 @@ int check_cache_data_hit(void *addr, char type) {
 int find_entry_index_in_set(int cache_index) {
   int entry_index;
 
+  if (DEFAULT_CACHE_ASSOC == 1) { // If set has only 1 entry, return index 0
+    return 0;
+  }
+
   /* Check if there exists any empty cache space by checking 'valid' */
   int j;
   // int i; unusued param
 
   for (j = 0; j < DEFAULT_CACHE_ASSOC; j++) {
     cache_entry_t *pEntry = &cache_array[cache_index][j];
-    if ((pEntry->valid = 0)) {
+    if (pEntry->valid == 0) {
       return j;
     }
   }
+  /* Otherwise, search over all entries to find the least recently used entry by
+   * checking timestamp */
   int timestamp_min = -1;
   for (j = 0; j < DEFAULT_CACHE_ASSOC; j++) {
     cache_entry_t *pEntry = &cache_array[cache_index][j];
-    if ((timestamp_min = -1 || timestamp_min > pEntry->timestamp)) {
+    if (timestamp_min == -1 || timestamp_min > pEntry->timestamp) {
       entry_index = j;
       timestamp_min = pEntry->timestamp;
     }
   }
-
-  /* Otherwise, search over all entries to find the least recently used entry by
-   * checking 'timestamp' */
-
+  // return the cache index for copying from memory
   return entry_index;
 }
 
