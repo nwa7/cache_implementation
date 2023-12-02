@@ -96,15 +96,15 @@ void print_cache_entries() {
 // this function is to return the data in the cache
 int check_cache_data_hit(void *addr, char type) {
   char *address = addr;
-  int block_address = *address / 8; // knowing 1 block = 8 bytes
+  int block_address = *address / DEFAULT_CACHE_BLOCK_SIZE_BYTE;
   int tag = block_address >>
             ((4 / DEFAULT_CACHE_ASSOC) -
              1); // the 4 could also be the blocknumber, 4 bytes for 1 word
   int temp1 = 1 << (4 / DEFAULT_CACHE_ASSOC);
   int set = block_address % temp1;
 
-  // printf("%d", address);
-
+  /* add this cache access cycle to global access cycle */
+  /* check all entries in a set */
   int j;
   for (j = 0; j < DEFAULT_CACHE_ASSOC; j++) {
     cache_entry_t *pEntry = &cache_array[set][j];
@@ -112,16 +112,28 @@ int check_cache_data_hit(void *addr, char type) {
     // check if the tag matches and the entry is valid
     if (pEntry->tag == tag && pEntry->valid == 1) {
       pEntry->timestamp = global_timestamp;
-      return pEntry->data[0]; // TODO that is not the right value yet, depends
-                              // on size I guess
+
+      // difference depending on type
+
+      switch (type) {
+      case 'b':
+        return pEntry->data[*address % DEFAULT_CACHE_BLOCK_SIZE_BYTE];
+
+      case 'h':
+        return *(short *)(pEntry->data +
+                          *address % DEFAULT_CACHE_BLOCK_SIZE_BYTE);
+        ;
+
+      case 'w':
+        return *(int *)(pEntry->data +
+                        *address % DEFAULT_CACHE_BLOCK_SIZE_BYTE);
+      default:
+        return -1; // unknown type
+      };
+      // return pEntry->data[0]; // TODO that is not the right value yet,
+      //  depends on size I guess
     }
   }
-  /* add this cache access cycle to global access cycle */
-  /* check all entries in a set */
-  /* if there is no data in cache, data is missed and return -1*/
-  // return -1 for missing
-
-  /* Return the data */
   return -1; // if the data is not in the cache
 }
 
@@ -143,8 +155,8 @@ int find_entry_index_in_set(int cache_index) {
       return j;
     }
   }
-  /* Otherwise, search over all entries to find the least recently used entry by
-   * checking timestamp */
+  /* Otherwise, search over all entries to find the least recently used entry
+   * by checking timestamp */
   int timestamp_min = -1;
   for (j = 0; j < DEFAULT_CACHE_ASSOC; j++) {
     cache_entry_t *pEntry = &cache_array[cache_index][j];
@@ -171,8 +183,8 @@ int access_memory(void *addr, char type) {
   find_entry_index_in_set(set); // get the entry index
   /* Add this main memory access cycle to global access cycle */
   /* Fetch the data from the main memory and copy them to the cache */
-  /* void *addr: addr is byte address, whereas your main memory address is word
-   * address due to 'int memory_array[]' */
+  /* void *addr: addr is byte address, whereas your main memory address is
+   * word address due to 'int memory_array[]' */
 
   /* You need to invoke find_entry_index_in_set() for copying to the cache */
 
