@@ -37,10 +37,10 @@ int access_memory(void *addr, char type);
 
 /* Cache Entry Structure */
 typedef struct cache_entry {
-  int valid;
-  int tag;
+  int valid;     // present = 1, not present = 0
+  int tag;       // tag of the stored data
   int timestamp; /* for approximate LRU: it should be equal to data access so
-                    far */
+                    far, most recent access time */
   char data[DEFAULT_CACHE_BLOCK_SIZE_BYTE];
 } cache_entry_t;
 

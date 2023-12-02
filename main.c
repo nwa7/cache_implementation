@@ -11,8 +11,8 @@
 
 #include "cache_impl.h"
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 int num_cache_hits = 0;
 int num_cache_misses = 0;
@@ -23,30 +23,31 @@ int num_access_cycles = 0;
 int global_timestamp = 0;
 
 int retrieve_data(void *addr, char data_type) {
-    char* ad=addr;
+  char *ad = addr;
   int value_returned = -1; /* accessed data */
-  int temp=atoi(ad);
+  int temp = atoi(ad);
   printf("%d", *ad);
   printf("a");
-value_returned=check_cache_data_hit(ad, data_type);
-  if(value_returned!=-1){
-    //Hit
+
+  value_returned = check_cache_data_hit(ad, data_type);
+  if (value_returned != -1) { // check data in cache
+    // Hit
     printf("Hit!!!");
     return value_returned;
   }
-  value_returned=access_memory(ad, data_type);
-  if(value_returned!=-1){
-  //Miss
-  printf("Miss!!!");
-  return value_returned;
-  }else{
 
-    printf("Error!!!");
+  value_returned = access_memory(ad, data_type);
+  if (value_returned != -1) { // check data in memory
+    // Miss
+    printf("Miss!!!");
+    // in case of miss event retrieve data from the main memory by invoking
+    // access memory
+    return value_returned;
+
+  } else {
+
+    printf("data neither in cache nor memory");
   }
-  /* Invoke check_cache_data_hit() */
-
-  /* In case of the cache miss event, access the main memory by invoking
-   * access_memory() */
 
   return value_returned;
 }
@@ -77,9 +78,9 @@ int main(void) {
 
   char line[256]; // to store the line that is being processed
   char *splitString;
- // while(**ofp!=NULL){
-   // printf(*ofp);
-    //ofp++;
+  // while(**ofp!=NULL){
+  // printf(*ofp);
+  // ofp++;
   //}
 
   while (fgets(line, sizeof(line), ifp) !=
@@ -87,27 +88,26 @@ int main(void) {
     /* Fill out here by invoking retrieve_data() */
     // call retrieve data to 4) Read each line
 
-    //retrieve_data(line[], 0);
+    // retrieve_data(line[], 0);
     printf("hello");
     puts(line);
-    access_type=line[4];
-    
+    access_type = line[4];
+
     fprintf(ofp, "Accessed data: %d\n", accessed_data);
-    //splitString=strtok(line, " ");
-    //puts((int*)splitString);
-    //puts((int*)(splitString+2));
-    *line=atoi(line);
+    // splitString=strtok(line, " ");
+    // puts((int*)splitString);
+    // puts((int*)(splitString+2));
+    *line = atoi(line);
     printf("%d", *line);
     retrieve_data(line, access_type);
     global_timestamp++;
+
+    // print hit ratio and bandwidth for each cache mechanism as regards to
+    // cache association size
   }
-  
-
-
 
   fclose(ifp);
   fclose(ofp);
 
-  print_cache_entries();
-  return 0;
+  print_cache_entries(); // print the final cache entries
 }

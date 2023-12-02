@@ -13,6 +13,8 @@
 #include <stdio.h>
 #include <string.h>
 
+/* get the global variables in other files */
+
 extern int num_cache_hits;
 extern int num_cache_misses;
 
@@ -21,8 +23,11 @@ extern int num_access_cycles;
 
 extern int global_timestamp;
 
+/* new variable used in this file */
 cache_entry_t cache_array[CACHE_SET_SIZE][DEFAULT_CACHE_ASSOC];
-int memory_array[DEFAULT_MEMORY_SIZE_WORD];
+// data in cache with size (number of sets X number of associations)
+int memory_array[DEFAULT_MEMORY_SIZE_WORD]; // data in memory with size of 128
+                                            // words
 
 /* DO NOT CHANGE THE FOLLOWING FUNCTION */
 void init_memory_content() {
@@ -38,39 +43,43 @@ void init_memory_content() {
     memory_array[index] = (sample_upward[i] << 24) | (sample_upward[j] << 16) |
                           (sample_downward[i] << 8) | (sample_downward[j]);
     if (++i >= 16)
-      i = 0;
+      i = 0; // cycle
     if (++j >= 16)
-      j = 0;
+      j = 0; // cycle
 
-    if (i == 0 && j == i + gap)
-      j = i + (++gap);
+    if (i == 0 && j == i + gap) // difference of i and j == gap
+      j = i + (++gap);          // increases 1 gap and new j for each cycle
 
     printf("mem[%d] = %#x\n", index, memory_array[index]);
   }
 }
 
 /* DO NOT CHANGE THE FOLLOWING FUNCTION */
+// This function is to initialize contents of the cache memory
 void init_cache_content() {
   int i, j;
 
+  // initialize cache data
   for (i = 0; i < CACHE_SET_SIZE; i++) {
     for (j = 0; j < DEFAULT_CACHE_ASSOC; j++) {
       cache_entry_t *pEntry = &cache_array[i][j];
-      pEntry->valid = 0;
-      pEntry->tag = -1;
-      pEntry->timestamp = 0;
+      pEntry->valid = 0;     // invalid
+      pEntry->tag = -1;      // no tag
+      pEntry->timestamp = 0; // no access trial
     }
   }
 }
 
 /* DO NOT CHANGE THE FOLLOWING FUNCTION */
-/* This function is a utility function to print all the cache entries. It will
+/* This function is an utility function to print all the cache entries. It will
  * be useful for your debugging */
 void print_cache_entries() {
   int i, j, k;
-
+  printf("ENTRY >> \n");
+  // for each set
   for (i = 0; i < CACHE_SET_SIZE; i++) {
     printf("[Set %d] ", i);
+    // for each entry in a set
     for (j = 0; j < DEFAULT_CACHE_ASSOC; j++) {
       cache_entry_t *pEntry = &cache_array[i][j];
       printf("V: %d Tag: %#x Time: %d Data: ", pEntry->valid, pEntry->tag,
@@ -84,46 +93,51 @@ void print_cache_entries() {
   }
 }
 
+// this function is to return the data in the cache
 int check_cache_data_hit(void *addr, char type) {
-    char *addres=addr;
-    int address=*addres;
-    printf("%d", address);
-    int block_address=address/8;
-    int tag=block_address>>((4/DEFAULT_CACHE_ASSOC)-1);//the 4 could also be the blocknumber
-    int temp1=1<<(4/DEFAULT_CACHE_ASSOC);
-    int set=block_address%temp1;
-    int j;
-    for(j=0;j<DEFAULT_CACHE_ASSOC;j++){
-        cache_entry_t *pEntry = &cache_array[set][j];
-        if(pEntry->tag==tag&&pEntry->valid==1){
-            pEntry->timestamp=global_timestamp;
-            return pEntry->data[0];//TODO that is not the right value yet, depends on size I guess
-        }
+  char *addres = addr;
+  int address = *addres;
+  printf("%d", address);
+  int block_address = address / 8;
+  int tag = block_address >> ((4 / DEFAULT_CACHE_ASSOC) -
+                              1); // the 4 could also be the blocknumber
+  int temp1 = 1 << (4 / DEFAULT_CACHE_ASSOC);
+  int set = block_address % temp1;
+  int j;
+  for (j = 0; j < DEFAULT_CACHE_ASSOC; j++) {
+    cache_entry_t *pEntry = &cache_array[set][j];
+    if (pEntry->tag == tag && pEntry->valid == 1) {
+      pEntry->timestamp = global_timestamp;
+      return pEntry->data[0]; // TODO that is not the right value yet, depends
+                              // on size I guess
     }
+  }
   /* Fill out here */
-  
+
   /* Return the data */
-  return -1;
+  return -1; // if the data is not in the cache
 }
 
+// This function is to find the entry index in set for copying to cache
 int find_entry_index_in_set(int cache_index) {
   int entry_index;
 
   /* Check if there exists any empty cache space by checking 'valid' */
   int i, j;
 
-    for (j = 0; j < DEFAULT_CACHE_ASSOC; j++) {
-      cache_entry_t *pEntry = &cache_array[cache_index][j];
-      if(pEntry->valid=0){
-          return j;
-      }
-  }int timestamp_min=-1;
- for (j = 0; j < DEFAULT_CACHE_ASSOC; j++) {
-      cache_entry_t *pEntry = &cache_array[cache_index][j];
-      if(timestamp_min=-1||timestamp_min>pEntry->timestamp){
-          entry_index=j;
-          timestamp_min=pEntry->timestamp;
-      }
+  for (j = 0; j < DEFAULT_CACHE_ASSOC; j++) {
+    cache_entry_t *pEntry = &cache_array[cache_index][j];
+    if (pEntry->valid = 0) {
+      return j;
+    }
+  }
+  int timestamp_min = -1;
+  for (j = 0; j < DEFAULT_CACHE_ASSOC; j++) {
+    cache_entry_t *pEntry = &cache_array[cache_index][j];
+    if (timestamp_min = -1 || timestamp_min > pEntry->timestamp) {
+      entry_index = j;
+      timestamp_min = pEntry->timestamp;
+    }
   }
 
   /* Otherwise, search over all entries to find the least recently used entry by
@@ -133,21 +147,24 @@ int find_entry_index_in_set(int cache_index) {
 }
 
 int access_memory(void *addr, char type) {
-    char *addres=addr;
-    int address=*addres;
-    printf("%d", address);
-    int block_address=address/8;
-    int tag=block_address>>((4/DEFAULT_CACHE_ASSOC)-1);//the 4 could also be the blocknumber
-    int temp1=1<<(4/DEFAULT_CACHE_ASSOC);
-    int set=block_address%temp1;
+  char *addres = addr;
+  int address = *addres;
+  printf("%d", address);
+  int block_address = address / 8;
+  int tag = block_address >> ((4 / DEFAULT_CACHE_ASSOC) -
+                              1); // the 4 could also be the blocknumber
+  int temp1 = 1 << (4 / DEFAULT_CACHE_ASSOC);
+  int set = block_address % temp1;
 
+  find_entry_index_in_set(set); // get the entry index
+  /* Add this main memory access cycle to global access cycle */
   /* Fetch the data from the main memory and copy them to the cache */
   /* void *addr: addr is byte address, whereas your main memory address is word
    * address due to 'int memory_array[]' */
 
   /* You need to invoke find_entry_index_in_set() for copying to the cache */
-    find_entry_index_in_set(set);
-  /* Return the accessed data with a suitable type */
 
-  return 0;
+  /* Return the accessed data with a suitable type (b, h, w)*/
+
+  return -1;
 }
