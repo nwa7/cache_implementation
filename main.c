@@ -25,7 +25,7 @@ int global_timestamp = 0;
 int retrieve_data(void *addr, char data_type) {
   char *ad = addr;
   int value_returned = -1; /* accessed data */
-  int temp = atoi(ad);
+  // int temp = atoi(ad);
   printf("%d", *ad);
   printf("a");
 
@@ -76,30 +76,17 @@ int main(void) {
     return -1;
   }
 
-  char line[256]; // to store the line that is being processed
-  char *splitString;
-  // while(**ofp!=NULL){
-  // printf(*ofp);
-  // ofp++;
-  //}
+  char line[256];
 
+  /* Fill out here by invoking retrieve_data() */
   while (fgets(line, sizeof(line), ifp) !=
          NULL) { // need to read all the input data
-    /* Fill out here by invoking retrieve_data() */
+    sscanf(line, "%lx %c", &access_addr, &access_type);
     // call retrieve data to 4) Read each line
+    // accessed_data = retrieve_data((void *)access_addr, access_type);
+    printf("Calling retrieve_data with addr: %lx, data_type: %c\n", access_addr,
+           access_type);
 
-    // retrieve_data(line[], 0);
-    printf("hello");
-    puts(line);
-    access_type = line[4];
-
-    fprintf(ofp, "Accessed data: %d\n", accessed_data);
-    // splitString=strtok(line, " ");
-    // puts((int*)splitString);
-    // puts((int*)(splitString+2));
-    *line = atoi(line);
-    printf("%d", *line);
-    retrieve_data(line, access_type);
     global_timestamp++;
 
     // print hit ratio and bandwidth for each cache mechanism as regards to
