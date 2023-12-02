@@ -85,28 +85,46 @@ void print_cache_entries() {
 }
 
 int check_cache_data_hit(void *addr, char type) {
-    int size;
-    int *address=addr;
-    printf("%d", *address);
-    if(type=="b"){
-        size=1;
-    }else if(type=="h"){
-        size=2;
-    }else{
-        size==4;
+    char *addres=addr;
+    int address=*addres;
+    printf("%d", address);
+    int block_address=address/8;
+    int tag=block_address>>((4/DEFAULT_CACHE_ASSOC)-1);//the 4 could also be the blocknumber
+    int temp1=1<<(4/DEFAULT_CACHE_ASSOC);
+    int set=block_address%temp1;
+    int j;
+    for(j=0;j<DEFAULT_CACHE_ASSOC;j++){
+        cache_entry_t *pEntry = &cache_array[set][j];
+        if(pEntry->tag==tag&&pEntry->valid==1){
+            pEntry->timestamp=global_timestamp;
+            return pEntry->data[0];//TODO that is not the right value yet, depends on size I guess
+        }
     }
   /* Fill out here */
-
-  //int address=addr[0];
   
   /* Return the data */
-  return 0;
+  return -1;
 }
 
 int find_entry_index_in_set(int cache_index) {
   int entry_index;
 
   /* Check if there exists any empty cache space by checking 'valid' */
+  int i, j;
+
+    for (j = 0; j < DEFAULT_CACHE_ASSOC; j++) {
+      cache_entry_t *pEntry = &cache_array[cache_index][j];
+      if(pEntry->valid=0){
+          return j;
+      }
+  }int timestamp_min=-1;
+ for (j = 0; j < DEFAULT_CACHE_ASSOC; j++) {
+      cache_entry_t *pEntry = &cache_array[cache_index][j];
+      if(timestamp_min=-1||timestamp_min>pEntry->timestamp){
+          entry_index=j;
+          timestamp_min=pEntry->timestamp;
+      }
+  }
 
   /* Otherwise, search over all entries to find the least recently used entry by
    * checking 'timestamp' */
@@ -115,13 +133,20 @@ int find_entry_index_in_set(int cache_index) {
 }
 
 int access_memory(void *addr, char type) {
+    char *addres=addr;
+    int address=*addres;
+    printf("%d", address);
+    int block_address=address/8;
+    int tag=block_address>>((4/DEFAULT_CACHE_ASSOC)-1);//the 4 could also be the blocknumber
+    int temp1=1<<(4/DEFAULT_CACHE_ASSOC);
+    int set=block_address%temp1;
 
   /* Fetch the data from the main memory and copy them to the cache */
   /* void *addr: addr is byte address, whereas your main memory address is word
    * address due to 'int memory_array[]' */
 
   /* You need to invoke find_entry_index_in_set() for copying to the cache */
-    find_entry_index_in_set(1);
+    find_entry_index_in_set(set);
   /* Return the accessed data with a suitable type */
 
   return 0;
