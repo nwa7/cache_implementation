@@ -60,7 +60,6 @@ int main(void) {
                         column) in "access_input.txt" */
   int accessed_data; /* This is the data that you want to retrieve first from
                         cache, and then from memory */
-
   init_memory_content(); // 1) Invoke init_memory_content
   init_cache_content();  // 2) Invoke init_cache_content
 
@@ -76,6 +75,8 @@ int main(void) {
     return -1;
   }
 
+  fprintf(ofp, "[Accessed Data]\n");
+
   char line[256];
 
   /* Fill out here by invoking retrieve_data() */
@@ -87,6 +88,9 @@ int main(void) {
     printf("Calling retrieve_data with addr: %lx, data_type: %c\n", access_addr,
            access_type);
 
+    fprintf(ofp, "%lu %c \n", access_addr, access_type);
+    // print addr and data_type accessed in the output file,
+    // when accessed_data ready add 0x%x
     global_timestamp++;
 
     // print hit ratio and bandwidth for each cache mechanism as regards to
