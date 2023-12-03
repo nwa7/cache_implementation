@@ -1,0 +1,11 @@
+[Accessed Data]
+508 w 0x780087 
+2 h 0x112 
+508 h 0x87 
+2 h 0x112 
+508 b 0x87 
+1 h 0x12fe 
+3 b 0x1 
+0 w 0x112feed 
+Hit ratio = 0.75    ( 6 / 8 ) 
+Bandwidth = 0.09    ( 18 / 208 ) 

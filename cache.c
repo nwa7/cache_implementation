@@ -100,7 +100,7 @@ int check_cache_data_hit(void *addr, char type) {
   int address = atoi(addres);
   int template = address; // store the address for data search later
   address = address / 8;
-  int tag = address / 4 * DEFAULT_CACHE_ASSOC;
+  int tag = address * DEFAULT_CACHE_ASSOC / 4;
   int set = address % (4 / DEFAULT_CACHE_ASSOC);
   /* add this cache access cycle to global access cycle */
   /* check all entries in a set */

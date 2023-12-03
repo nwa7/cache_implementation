@@ -1,0 +1,13 @@
+[Accessed Data]
+0 w 0x112feed 
+8 w 0x2334dccb 
+16 w 0x4556baa9 
+24 w 0x67789887 
+32 w 0x899a7665 
+40 w 0xabbc5443 
+48 w 0xcdde3221 
+56 w 0xef001000 
+64 w 0x123fedc 
+72 w 0x2345dcba 
+Hit ratio = 0.00    ( 0 / 10 ) 
+Bandwidth = 0.04    ( 40 / 1010 ) 
