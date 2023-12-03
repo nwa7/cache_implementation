@@ -79,12 +79,14 @@ int main(void) {
 
   char line[256];
 
+print_cache_entries();
   /* Fill out here by invoking retrieve_data() */
   while (fgets(line, sizeof(line), ifp) !=
          NULL) { // need to read all the input data
     sscanf(line, "%lx %c", &access_addr, &access_type);
     // call retrieve data to 4) Read each line
-    // accessed_data = retrieve_data((void *)access_addr, access_type);
+    int accessed_data=retrieve_data(line, line[4]);
+    //int accessed_data = retrieve_data((void *)access_addr, access_type);
     printf("Calling retrieve_data with addr: %lx, data_type: %c\n", access_addr,
            access_type);
 
