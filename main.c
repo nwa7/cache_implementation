@@ -25,7 +25,6 @@ int global_timestamp = 0;
 int retrieve_data(void *addr, char data_type) {
   char *ad = addr;
   int value_returned = -1; /* accessed data */
-  // int temp = atoi(ad);
   printf("%d", *ad);
   printf("a");
 
@@ -44,8 +43,6 @@ int retrieve_data(void *addr, char data_type) {
     // Miss
     num_cache_misses++;
     printf("Miss!!!\n");
-    // in case of miss event retrieve data from the main memory by invoking
-    // access memory
     return value_returned;
 
   } else {
@@ -89,36 +86,30 @@ int main(void) {
          NULL) { // need to read all the input data
     sscanf(line, "%lx %c", &access_addr, &access_type);
     // call retrieve data to 4) Read each line
-    int accessed_data = retrieve_data(line, line[4]);
-    // int accessed_data = retrieve_data((void *)access_addr, access_type);
+    // int accessed_data = retrieve_data(line, line[4]);
+    int accessed_data = retrieve_data(line, access_type);
     printf("Calling retrieve_data with addr: %lx, data_type: %c\n", access_addr,
            access_type);
 
-    fprintf(ofp, "%lx %c 0x%x \n", access_addr, access_type, accessed_data);
+    fprintf(
+        ofp, "%lx %c 0x%x \n", access_addr, access_type,
+        accessed_data); // print addr and data_type accessed in the output file,
     printf(" data: %X ", accessed_data);
-    // print addr and data_type accessed in the output file,
-    // when accessed_data ready add 0x%x
 
-    // print hit ratio and bandwidth for each cache mechanism as regards to
-    // cache association size
-    /** if (check_cache_data_hit((void *)access_addr, access_type) != -1) {
-      num_cache_hits++;
-    }; **/
-
-    /** if (access_memory((void *)access_addr, access_type) != -1) {
-      num_cache_miss++;
-    }; **/
     global_timestamp++;
   }
+  // hit ratio
   double hit_ratio =
       (double)num_cache_hits / (num_cache_misses + num_cache_hits);
   fprintf(ofp, "Hit ratio = %.2f    ( %d / %d ) \n", hit_ratio, num_cache_hits,
           num_cache_misses + num_cache_hits);
 
+  // bandwidth
   double bandwidth = (double)num_bytes / num_access_cycles;
   fprintf(ofp, "Bandwidth = %.2f    ( %d / %d ) \n", bandwidth, num_bytes,
           num_access_cycles);
 
+  // closing documents
   fclose(ifp);
   fclose(ofp);
 
