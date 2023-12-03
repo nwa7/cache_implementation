@@ -24,26 +24,28 @@ int global_timestamp = 0;
 
 int retrieve_data(void *addr, char data_type) {
   char *ad = addr;
-  int value_returned = -1; /* accessed data */
+  int value_returned = -1;
   printf("%d", *ad);
   printf("a");
 
+  // checking if data is in cache
   value_returned = check_cache_data_hit(ad, data_type);
-  num_access_cycles += CACHE_ACCESS_CYCLE;
-  if (value_returned != -1) { // check data in cache
-    // Hit
+  num_access_cycles += CACHE_ACCESS_CYCLE; // adding the number of clock cycles
+                                           // to go through cache
+  if (value_returned != -1) {
     printf("Hit!!!\n");
-    num_cache_hits++;
-    return value_returned;
+    num_cache_hits++;      // Hit
+    return value_returned; // returning address in cache
   }
 
+  // if it's not in the cache checking if it is in memory
   value_returned = access_memory(ad, data_type);
-  num_access_cycles += MEMORY_ACCESS_CYCLE;
-  if (value_returned != -1) { // check data in memory
-    // Miss
-    num_cache_misses++;
+  num_access_cycles += MEMORY_ACCESS_CYCLE; // adding the number of clock cycles
+                                            // to go through memory
+  if (value_returned != -1) {               // check data in memory
+    num_cache_misses++;                     // Miss
     printf("Miss!!!\n");
-    return value_returned;
+    return value_returned; // returning address in memory
 
   } else {
 
@@ -55,21 +57,18 @@ int retrieve_data(void *addr, char data_type) {
 
 int main(void) {
   FILE *ifp = NULL, *ofp = NULL;
-  unsigned long int access_addr; /* byte address (located at 1st column) in
-                                    "access_input.txt" */
-  char access_type; /* 'b'(byte), 'h'(halfword), or 'w'(word) (located at 2nd
-                       column) in "access_input.txt" */
-  // int accessed_data; /* This is the data that you want to retrieve first from
-  // cache, and then from memory * /
+  unsigned long int access_addr;
+  char access_type; // 'b'(byte), 'h'(halfword), or 'w'(word)
+
   init_memory_content(); // 1) Invoke init_memory_content
   init_cache_content();  // 2) Invoke init_cache_content
 
-  ifp = fopen("access_input.txt", "r"); // 3) open access_input.txt file
+  ifp = fopen("access_input.txt", "r"); // 3) open input file in reading mode
   if (ifp == NULL) {
     printf("Can't open input file\n");
     return -1;
   }
-  ofp = fopen("access_output.txt", "w");
+  ofp = fopen("access_output.txt", "w"); // open output file in writing mode
   if (ofp == NULL) {
     printf("Can't open output file\n");
     fclose(ifp);
@@ -80,34 +79,31 @@ int main(void) {
 
   char line[256];
 
-  print_cache_entries();
-  /* Fill out here by invoking retrieve_data() */
   while (fgets(line, sizeof(line), ifp) !=
-         NULL) { // need to read all the input data
+         NULL) { // we're iterating on each line in ifp
     sscanf(line, "%lx %c", &access_addr, &access_type);
-    // call retrieve data to 4) Read each line
-    // int accessed_data = retrieve_data(line, line[4]);
-    int accessed_data = retrieve_data(line, access_type);
+    int accessed_data = retrieve_data(
+        line, access_type); // call retrieve data to 4) Read each line
     printf("Calling retrieve_data with addr: %lx, data_type: %c\n", access_addr,
            access_type);
-
     fprintf(
         ofp, "%lx %c 0x%x \n", access_addr, access_type,
         accessed_data); // print addr and data_type accessed in the output file,
     printf(" data: %X ", accessed_data);
 
-    global_timestamp++;
+    global_timestamp++; // incrementing number of accesses
   }
   // hit ratio
   double hit_ratio =
       (double)num_cache_hits / (num_cache_misses + num_cache_hits);
   fprintf(ofp, "Hit ratio = %.2f    ( %d / %d ) \n", hit_ratio, num_cache_hits,
-          num_cache_misses + num_cache_hits);
+          num_cache_misses +
+              num_cache_hits); // number of hits / number of accesses
 
   // bandwidth
   double bandwidth = (double)num_bytes / num_access_cycles;
   fprintf(ofp, "Bandwidth = %.2f    ( %d / %d ) \n", bandwidth, num_bytes,
-          num_access_cycles);
+          num_access_cycles); // number of bytes / number of clock cycles
 
   // closing documents
   fclose(ifp);
