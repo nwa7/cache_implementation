@@ -116,7 +116,7 @@ int main(void) {
           num_cache_misses + num_cache_hits);
 
   double bandwidth = (double)num_bytes / num_access_cycles;
-  fprintf(ofp, "Bandwidth = %.2f    ( %d / %d ) \n", hit_ratio, num_bytes,
+  fprintf(ofp, "Bandwidth = %.2f    ( %d / %d ) \n", bandwidth, num_bytes,
           num_access_cycles);
 
   fclose(ifp);
