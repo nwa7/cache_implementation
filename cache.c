@@ -99,6 +99,7 @@ void print_cache_entries() {
 int check_cache_data_hit(void *addr, char type) {
   char *addres = addr;
   int address=atoi(addres);
+  int template=address;
   address=address/8;
 /*  int block_address = address / DEFAULT_CACHE_BLOCK_SIZE_BYTE;
   int tag = block_address >>
@@ -106,8 +107,8 @@ int check_cache_data_hit(void *addr, char type) {
              1); // the 4 could also be the blocknumber, 4 bytes for 1 word
   */  
   int temp1 = 1 << ((4 / DEFAULT_CACHE_ASSOC)-1);
-  int tag=address>>(temp1-1);
-  int set = address % temp1;
+  int tag=address/4*DEFAULT_CACHE_ASSOC;//>>(temp1-1);
+  int set = address % (4/DEFAULT_CACHE_ASSOC);
 
   /* add this cache access cycle to global access cycle */
   /* check all entries in a set */
@@ -118,11 +119,21 @@ int check_cache_data_hit(void *addr, char type) {
     // check if the tag matches and the entry is valid
     if (pEntry->tag == tag && pEntry->valid == 1) {
       pEntry->timestamp = global_timestamp;
-//TODO add output search
       // difference depending on type
-      return 1;
-
-      // return pEntry->data[0]; // TODO that is not the right value 
+      int memo=pEntry->data[template/4];
+      memo+=(pEntry->data[(template/DEFAULT_MEMORY_SIZE_WORD)+1]<<(32-(8*(template%DEFAULT_MEMORY_SIZE_WORD))));
+  
+ int f;
+  if(type=='b'){
+     memo=memo&0xff;
+  }
+  if(type=='h'){
+     memo=memo&0xffff;
+  }
+  if(type=='w'){
+     memo=memo&0xffffffff;
+  }
+      return memo;
     }
   }
   return -1; // if the data is not in the cache
@@ -163,6 +174,7 @@ int find_entry_index_in_set(int cache_index) {
 int access_memory(void *addr, char type) {
   char *address = addr;
   int temp=atoi(address);
+  int template=temp;
   temp=temp/8;
 /*  printf("%d", temp);
   printf("hh");
@@ -172,8 +184,8 @@ int access_memory(void *addr, char type) {
              1); // the 4 could also be the blocknumber, 4 bytes for 1 word
 */
   int temp1 = 1 << ((4 / DEFAULT_CACHE_ASSOC)-1);
-  int set = temp % temp1;
-  int tag=temp>>(temp1-1);
+  int set = temp % (4/DEFAULT_CACHE_ASSOC);
+  int tag=temp/4*DEFAULT_CACHE_ASSOC;//>>(temp1-1);
   printf("%d", tag);
   printf("hh");
   printf("%d", set);
@@ -182,30 +194,42 @@ int access_memory(void *addr, char type) {
   /* add this cache access cycle to global access cycle */
   /* check all entries in a set */
   
-  long memo=memory_array[*address/DEFAULT_MEMORY_SIZE_WORD];
-  memo>>(16*(*address%DEFAULT_MEMORY_SIZE_WORD));
-  memo+=(memory_array[(*address/DEFAULT_MEMORY_SIZE_WORD)+1]<<(64-(16*(*address%DEFAULT_MEMORY_SIZE_WORD))));
+  int memo=memory_array[template/4];
+  memo>>(8*(template%4));
+  //printf(" mem %d", memo);
+  memo+=(memory_array[(template/DEFAULT_MEMORY_SIZE_WORD)+1]<<(32-(8*(template%DEFAULT_MEMORY_SIZE_WORD))));
+  
+  //printf(" mem %d", memo);
  int f;
   if(type=='b'){
-     memo=memo&&0xff;
+     memo=memo&0xff;
+     
+  //printf(" mem %d", memo);
   }
   if(type=='h'){
-     memo=memo&&0xffff;
+     memo=memo&0xffff;
+     
+  //printf(" mem %d", memo);
   }
   if(type=='w'){
-     memo=memo&&0xffffffff;
+     memo=memo&0xffffffff;
+     
+  //printf(" mem %d", memo);
   }
-  int block=*address/DEFAULT_CACHE_BLOCK_SIZE_BYTE;
+  int block=template/8;
+  block*=2;
   int index=find_entry_index_in_set(set);
-  
-    cache_entry_t *pEntry = &cache_array[set][index];
-    for(int k=0;k<DEFAULT_CACHE_BLOCK_SIZE_BYTE;k++){
-    pEntry->data[k]=memory_array[block*DEFAULT_CACHE_BLOCK_SIZE_BYTE+k];
+    cache_entry_t *pEntry = &cache_array[set][index]; 
+
+    for(int k=0;k<(DEFAULT_CACHE_BLOCK_SIZE_BYTE/2);k++){
+    pEntry->data[3-k]=memory_array[block]>>(24-(8*k));
+    pEntry->data[7-k]=memory_array[block+1]>>(24-(8*k));
+
     }
     pEntry->valid=1;
     pEntry->timestamp=global_timestamp;
     pEntry->tag=tag;
-    printf("%li", memo);
+    //printf("%li", memo);
     return memo;
   // get the entry index
   /* Add this main memory access cycle to global access cycle */

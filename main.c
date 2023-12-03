@@ -33,12 +33,14 @@ int retrieve_data(void *addr, char data_type) {
   if (value_returned != -1) { // check data in cache
     // Hit
     printf("Hit!!!\n");
+    num_cache_hits++;
     return value_returned;
   }
 
   value_returned = access_memory(ad, data_type);
   if (value_returned != -1) { // check data in memory
     // Miss
+    num_cache_misses++;
     printf("Miss!!!\n");
     // in case of miss event retrieve data from the main memory by invoking
     // access memory
@@ -91,6 +93,7 @@ print_cache_entries();
            access_type);
 
     fprintf(ofp, "%lx %c \n", access_addr, access_type);
+    printf(" data: %X ", accessed_data);
     // print addr and data_type accessed in the output file,
     // when accessed_data ready add 0x%x
 
@@ -105,7 +108,7 @@ print_cache_entries();
     }; **/
     global_timestamp++;
   }
-
+printf("Hitratio: %d / %d ", num_cache_hits, num_cache_misses);
   /**double hit_ratio = (double)num_cache_hits / global_timestamp;
   fprintf(ofp, "Hit Ratio: %.2f%%\n",
           hit_ratio * 100); // print hit_ratio in ofp
