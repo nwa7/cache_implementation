@@ -25,15 +25,12 @@ int global_timestamp = 0;
 int retrieve_data(void *addr, char data_type) {
   char *ad = addr;
   int value_returned = -1;
-  printf("%d", *ad);
-  printf("a");
 
   // checking if data is in cache
   value_returned = check_cache_data_hit(ad, data_type);
   num_access_cycles += CACHE_ACCESS_CYCLE; // adding the number of clock cycles
                                            // to go through cache
   if (value_returned != -1) {
-    printf("Hit!!!\n");
     num_cache_hits++;      // Hit
     return value_returned; // returning address in cache
   }
@@ -44,8 +41,7 @@ int retrieve_data(void *addr, char data_type) {
                                             // to go through memory
   if (value_returned != -1) {               // check data in memory
     num_cache_misses++;                     // Miss
-    printf("Miss!!!\n");
-    return value_returned; // returning address in memory
+    return value_returned;                  // returning address in memory
 
   } else {
 
@@ -84,12 +80,9 @@ int main(void) {
     sscanf(line, "%lx %c", &access_addr, &access_type);
     int accessed_data = retrieve_data(
         line, access_type); // call retrieve data to 4) Read each line
-    printf("Calling retrieve_data with addr: %lx, data_type: %c\n", access_addr,
-           access_type);
     fprintf(
         ofp, "%lx %c 0x%x \n", access_addr, access_type,
         accessed_data); // print addr and data_type accessed in the output file,
-    printf(" data: %X ", accessed_data);
 
     global_timestamp++; // incrementing number of accesses
   }
