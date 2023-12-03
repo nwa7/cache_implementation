@@ -30,6 +30,7 @@ int retrieve_data(void *addr, char data_type) {
   printf("a");
 
   value_returned = check_cache_data_hit(ad, data_type);
+  num_access_cycles += CACHE_ACCESS_CYCLE;
   if (value_returned != -1) { // check data in cache
     // Hit
     printf("Hit!!!\n");
@@ -38,6 +39,7 @@ int retrieve_data(void *addr, char data_type) {
   }
 
   value_returned = access_memory(ad, data_type);
+  num_access_cycles += MEMORY_ACCESS_CYCLE;
   if (value_returned != -1) { // check data in memory
     // Miss
     num_cache_misses++;
@@ -81,18 +83,18 @@ int main(void) {
 
   char line[256];
 
-print_cache_entries();
+  print_cache_entries();
   /* Fill out here by invoking retrieve_data() */
   while (fgets(line, sizeof(line), ifp) !=
          NULL) { // need to read all the input data
     sscanf(line, "%lx %c", &access_addr, &access_type);
     // call retrieve data to 4) Read each line
-    int accessed_data=retrieve_data(line, line[4]);
-    //int accessed_data = retrieve_data((void *)access_addr, access_type);
+    int accessed_data = retrieve_data(line, line[4]);
+    // int accessed_data = retrieve_data((void *)access_addr, access_type);
     printf("Calling retrieve_data with addr: %lx, data_type: %c\n", access_addr,
            access_type);
 
-    fprintf(ofp, "%lx %c \n", access_addr, access_type);
+    fprintf(ofp, "%lx %c 0x%x \n", access_addr, access_type, accessed_data);
     printf(" data: %X ", accessed_data);
     // print addr and data_type accessed in the output file,
     // when accessed_data ready add 0x%x
@@ -108,13 +110,15 @@ print_cache_entries();
     }; **/
     global_timestamp++;
   }
-printf("Hitratio: %d / %d ", num_cache_hits, num_cache_misses);
-  /**double hit_ratio = (double)num_cache_hits / global_timestamp;
-  fprintf(ofp, "Hit Ratio: %.2f%%\n",
-          hit_ratio * 100); // print hit_ratio in ofp
-**/
+  double hit_ratio =
+      (double)num_cache_hits / (num_cache_misses + num_cache_hits);
+  fprintf(ofp, "Hit ratio = %.2f    ( %d / %d ) \n", hit_ratio, num_cache_hits,
+          num_cache_misses + num_cache_hits);
 
-  // NEED TO CALCULATE BANDWITH = NUMBER OF BYTES / NUMBER OF CLOCK CYCLES
+  double bandwidth = (double)num_bytes / num_access_cycles;
+  fprintf(ofp, "Bandwidth = %.2f    ( %d / %d ) \n", hit_ratio, num_bytes,
+          num_access_cycles);
+
   fclose(ifp);
   fclose(ofp);
 

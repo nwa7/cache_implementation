@@ -11,9 +11,8 @@
 
 #include "cache_impl.h"
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
-
+#include <string.h>
 
 /* get the global variables in other files */
 
@@ -98,17 +97,17 @@ void print_cache_entries() {
 // this function is to return the data in the cache
 int check_cache_data_hit(void *addr, char type) {
   char *addres = addr;
-  int address=atoi(addres);
-  int template=address;
-  address=address/8;
-/*  int block_address = address / DEFAULT_CACHE_BLOCK_SIZE_BYTE;
-  int tag = block_address >>
-            ((4 / DEFAULT_CACHE_ASSOC) -
-             1); // the 4 could also be the blocknumber, 4 bytes for 1 word
-  */  
-  int temp1 = 1 << ((4 / DEFAULT_CACHE_ASSOC)-1);
-  int tag=address/4*DEFAULT_CACHE_ASSOC;//>>(temp1-1);
-  int set = address % (4/DEFAULT_CACHE_ASSOC);
+  int address = atoi(addres);
+  int template = address;
+  address = address / 8;
+  /*  int block_address = address / DEFAULT_CACHE_BLOCK_SIZE_BYTE;
+    int tag = block_address >>
+              ((4 / DEFAULT_CACHE_ASSOC) -
+               1); // the 4 could also be the blocknumber, 4 bytes for 1 word
+    */
+  int temp1 = 1 << ((4 / DEFAULT_CACHE_ASSOC) - 1);
+  int tag = address / 4 * DEFAULT_CACHE_ASSOC; //>>(temp1-1);
+  int set = address % (4 / DEFAULT_CACHE_ASSOC);
 
   /* add this cache access cycle to global access cycle */
   /* check all entries in a set */
@@ -120,19 +119,25 @@ int check_cache_data_hit(void *addr, char type) {
     if (pEntry->tag == tag && pEntry->valid == 1) {
       pEntry->timestamp = global_timestamp;
       // difference depending on type
-      int memo=pEntry->data[template/4];
-      memo+=(pEntry->data[(template/DEFAULT_MEMORY_SIZE_WORD)+1]<<(32-(8*(template%DEFAULT_MEMORY_SIZE_WORD))));
-  
- int f;
-  if(type=='b'){
-     memo=memo&0xff;
-  }
-  if(type=='h'){
-     memo=memo&0xffff;
-  }
-  if(type=='w'){
-     memo=memo&0xffffffff;
-  }
+      int memo = pEntry->data[template / 4];
+      memo += (pEntry->data[(template / DEFAULT_MEMORY_SIZE_WORD) + 1]
+               << (32 - (8 * (template % DEFAULT_MEMORY_SIZE_WORD))));
+
+      int f;
+      int data_size = 0;
+
+      if (type == 'b') {
+        memo = memo & 0xff;
+        data_size = 1;
+      } else if (type == 'h') {
+        memo = memo & 0xffff;
+        data_size = 2;
+      } else if (type == 'w') {
+        memo = memo & 0xffffffff;
+        data_size = 4;
+      }
+
+      num_bytes += data_size;
       return memo;
     }
   }
@@ -173,19 +178,19 @@ int find_entry_index_in_set(int cache_index) {
 
 int access_memory(void *addr, char type) {
   char *address = addr;
-  int temp=atoi(address);
-  int template=temp;
-  temp=temp/8;
-/*  printf("%d", temp);
-  printf("hh");
-  int block_address = temp / DEFAULT_CACHE_BLOCK_SIZE_BYTE;
-  int tag = block_address >>
-            ((4 / DEFAULT_CACHE_ASSOC) -
-             1); // the 4 could also be the blocknumber, 4 bytes for 1 word
-*/
-  int temp1 = 1 << ((4 / DEFAULT_CACHE_ASSOC)-1);
-  int set = temp % (4/DEFAULT_CACHE_ASSOC);
-  int tag=temp/4*DEFAULT_CACHE_ASSOC;//>>(temp1-1);
+  int temp = atoi(address);
+  int template = temp;
+  temp = temp / 8;
+  /*  printf("%d", temp);
+    printf("hh");
+    int block_address = temp / DEFAULT_CACHE_BLOCK_SIZE_BYTE;
+    int tag = block_address >>
+              ((4 / DEFAULT_CACHE_ASSOC) -
+               1); // the 4 could also be the blocknumber, 4 bytes for 1 word
+  */
+  int temp1 = 1 << ((4 / DEFAULT_CACHE_ASSOC) - 1);
+  int set = temp % (4 / DEFAULT_CACHE_ASSOC);
+  int tag = temp / 4 * DEFAULT_CACHE_ASSOC; //>>(temp1-1);
   printf("%d", tag);
   printf("hh");
   printf("%d", set);
@@ -193,44 +198,46 @@ int access_memory(void *addr, char type) {
 
   /* add this cache access cycle to global access cycle */
   /* check all entries in a set */
-  
-  int memo=memory_array[template/4];
-  memo>>(8*(template%4));
-  //printf(" mem %d", memo);
-  memo+=(memory_array[(template/DEFAULT_MEMORY_SIZE_WORD)+1]<<(32-(8*(template%DEFAULT_MEMORY_SIZE_WORD))));
-  
-  //printf(" mem %d", memo);
- int f;
-  if(type=='b'){
-     memo=memo&0xff;
-     
-  //printf(" mem %d", memo);
-  }
-  if(type=='h'){
-     memo=memo&0xffff;
-     
-  //printf(" mem %d", memo);
-  }
-  if(type=='w'){
-     memo=memo&0xffffffff;
-     
-  //printf(" mem %d", memo);
-  }
-  int block=template/8;
-  block*=2;
-  int index=find_entry_index_in_set(set);
-    cache_entry_t *pEntry = &cache_array[set][index]; 
 
-    for(int k=0;k<(DEFAULT_CACHE_BLOCK_SIZE_BYTE/2);k++){
-    pEntry->data[3-k]=memory_array[block]>>(24-(8*k));
-    pEntry->data[7-k]=memory_array[block+1]>>(24-(8*k));
+  int memo = memory_array[template / 4];
+  memo >> (8 * (template % 4));
+  // printf(" mem %d", memo);
+  memo += (memory_array[(template / DEFAULT_MEMORY_SIZE_WORD) + 1]
+           << (32 - (8 * (template % DEFAULT_MEMORY_SIZE_WORD))));
 
-    }
-    pEntry->valid=1;
-    pEntry->timestamp=global_timestamp;
-    pEntry->tag=tag;
-    //printf("%li", memo);
-    return memo;
+  // printf(" mem %d", memo);
+  int f;
+  int data_size = 0;
+
+  if (type == 'b') {
+    memo = memo & 0xff;
+    data_size = 1;
+
+  } else if (type == 'h') {
+    memo = memo & 0xffff;
+    data_size = 2;
+
+  } else if (type == 'w') {
+    memo = memo & 0xffffffff;
+    data_size = 4;
+  }
+
+  num_bytes += data_size;
+
+  int block = template / 8;
+  block *= 2;
+  int index = find_entry_index_in_set(set);
+  cache_entry_t *pEntry = &cache_array[set][index];
+
+  for (int k = 0; k < (DEFAULT_CACHE_BLOCK_SIZE_BYTE / 2); k++) {
+    pEntry->data[3 - k] = memory_array[block] >> (24 - (8 * k));
+    pEntry->data[7 - k] = memory_array[block + 1] >> (24 - (8 * k));
+  }
+  pEntry->valid = 1;
+  pEntry->timestamp = global_timestamp;
+  pEntry->tag = tag;
+  // printf("%li", memo);
+  return memo;
   // get the entry index
   /* Add this main memory access cycle to global access cycle */
   /* Fetch the data from the main memory and copy them to the cache */
@@ -240,5 +247,5 @@ int access_memory(void *addr, char type) {
   /* You need to invoke find_entry_index_in_set() for copying to the cache */
 
   /* Return the accessed data with a suitable type (b, h, w)*/
- // if the data is not in the memory
+  // if the data is not in the memory
 }
