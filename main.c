@@ -59,12 +59,12 @@ int main(void) {
   init_memory_content(); // 1) Invoke init_memory_content
   init_cache_content();  // 2) Invoke init_cache_content
 
-  ifp = fopen("access_input_3.txt", "r"); // 3) open input file in reading mode
+  ifp = fopen("access_input.txt", "r"); // 3) open input file in reading mode
   if (ifp == NULL) {
     printf("Can't open input file\n");
     return -1;
   }
-  ofp = fopen("access_output_3.txt", "w"); // open output file in writing mode
+  ofp = fopen("access_output.txt", "w"); // open output file in writing mode
   if (ofp == NULL) {
     printf("Can't open output file\n");
     fclose(ifp);
